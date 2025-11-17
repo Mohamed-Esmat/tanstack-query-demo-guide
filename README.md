@@ -6,6 +6,10 @@ If you just want to try the app locally, jump to “Run the demo locally”. If 
 
 ## Table of contents
 
+- About this project
+- Project structure (quick map)
+- How to use this project (students)
+- Backend API and server
 - What and why TanStack Query
 - Core mental model: server state vs UI state
 - Installation and project setup
@@ -27,6 +31,82 @@ If you just want to try the app locally, jump to “Run the demo locally”. If 
 - Further reading
 
 ---
+
+## About this project
+
+This is a learning-friendly demo app that showcases real-world TanStack Query (v5) patterns in a simple posts application.
+
+What you can do in the UI:
+
+- Browse recent posts and view details
+- Search posts by text
+- Create a new post
+- Edit a post with an optimistic update and rollback
+- Delete a post and navigate back to the list
+
+Under the hood:
+
+- Frontend: React + Vite
+- Server: Express with JSON “database” files in `backend/data`
+- Networking: standard `fetch` helpers in `src/util/http.js` (request cancellation supported via AbortSignal)
+
+## Project structure (quick map)
+
+- `backend/`
+  - `app.js`: Express server with REST endpoints for posts and selectable images
+  - `data/posts.json`, `data/images.json`: JSON data the API reads/writes
+- `src/util/http.js`: QueryClient instance and all network helpers (fetch/create/update/delete)
+- `src/components/Posts/`
+  - `NewPostsSection.jsx`: Query for `['posts']` with `staleTime`
+  - `FindPostSection.jsx`: Dependent query with `enabled` and search term
+  - `PostDetails.jsx`: Detail query `['posts', id]` + delete mutation
+  - `EditPost.jsx`: Update mutation with optimistic update + rollback
+  - `NewPost.jsx`: Create mutation + invalidation of list
+  - `PostForm.jsx`: Fetch selectable images via query in a form
+- `src/App.jsx`: Wraps the app with `QueryClientProvider`
+
+## How to use this project (students)
+
+Follow these steps to learn TanStack Query effectively using this repo:
+
+1. Run the API server (see “Backend API and server” below).
+2. Run the frontend (see “Run the demo locally”).
+3. Explore features in the UI (list, details, search, create, edit, delete).
+4. Open the corresponding component files in `src/components/Posts` and trace how queries/mutations are wired.
+5. Read `src/util/http.js` to see helpers and how `QueryClient` is created.
+6. Try small changes (e.g., tweak `staleTime`, add `select`, or adjust invalidation) and observe behavior.
+
+Optional practice ideas:
+
+- Add pagination with `placeholderData: (prev) => prev`
+- Add an infinite list with `useInfiniteQuery`
+- Prefetch post details before navigation
+- Add React Query Devtools and inspect the cache
+
+## Backend API and server
+
+Run the backend API on port 3000:
+
+```bash
+cd backend
+npm install
+npm start
+# server runs at http://localhost:3000
+```
+
+Endpoints (used by the frontend in `src/util/http.js`):
+
+- `GET /posts?search=<term>&max=<n>` — list posts (supports search and limiting)
+- `GET /posts/images` — get selectable image names
+- `GET /posts/:id` — get a single post (simulated 1s delay)
+- `POST /posts` — create a post; body: `{ post: { title, description, date, time, image, location } }`
+- `PUT /posts/:id` — update a post; body: `{ post: { ... } }`
+- `DELETE /posts/:id` — delete a post
+
+Data source:
+
+- Posts: `backend/data/posts.json`
+- Images: `backend/data/images.json`
 
 ## What and why TanStack Query
 
